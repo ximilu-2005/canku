@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>2025年</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            font-family: "宋体", "SimSun", serif;
+        }
+        
+        body {
+            background-color: #fffbf5;      /* 备用背景色（图片加载失败时显示） */
+            color: #000;
+            margin: 0 auto;
+            padding: 10px;
+            position: relative;
+            max-width: 1000px;
+        }
+        
+        /* 添加伪元素来实现带透明度的背景图 */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:url("背景.jpg");
+            background-size: cover;          
+            background-repeat: no-repeat;   
+            background-attachment: fixed;   
+            background-position: center;    
+            opacity: 0.5; /* 透明度设置，0-1之间，值越小越透明 */
+            z-index: -1; /* 确保背景在内容下方 */
+            filter: alpha(opacity=30); /* 兼容IE浏览器 */
+        }
+        
+        /* 调整：保持宽度不变，减小高度的外框样式 */
+        .broken-image-tall {
+            border: 2px dashed #ff6666;
+            background-color: #ffeeee;
+            padding: 10px;
+            display: inline-block;
+            margin: 10px;
+            width: 300px;  /* 保持宽度不变 */
+            height: 220px; /* 减小高度以适应原图 */
+            position: relative;
+        }
+        
+        /* 适配普通图片的外框样式（宽度固定，高度自适应）- 统一宽度 */
+        .broken-image {
+            border: 2px dashed #ff6666;
+            background-color: #ffeeee;
+            padding: 10px;
+            display: inline-block;
+            margin: 10px;
+            width: 300px;  /* 统一宽度 */
+            height: auto;  /* 高度自适应内容 */
+            position: relative;
+        }
+        
+        /* 适配图片的样式 */
+        .local-image {
+            width: 100%;   /* 宽度占满外框 */
+            height: auto;  /* 高度自适应原图比例 */
+            border: 1px solid #999999;
+            display: block;/* 消除底部空隙 */
+        }
+        
+        /* 调整：适配缩短外框的图片样式 */
+        .local-image-tall {
+            width: 100%;  /* 保持宽度100% */
+            height: 100%; /* 高度100%填充外框 */
+            object-fit: contain; /* 改为contain，完整显示图片 */
+            border: 1px solid #999999;
+        }
+        
+        /* 水平翻转样式 */
+        .flip-horizontal {
+            transform: scaleX(-1);
+        }
+        
+        /* 顶部导航栏 */
+        .top-nav-container {
+            margin-bottom: 20px;
+        }
+        
+        /* 下方内容区布局 */
+        .content-wrapper {
+            display: flex;
+            gap: 20px;
+        }
+        
+        /* 左侧栏（导航栏下方） */
+        .sidebar {
+            width: 220px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        /* 信息板块样式 */
+        .info-section {
+            background-color: rgba(255, 248, 235, 0.9);
+            border: 3px double #66aa66;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        
+        /* 板块独立标题栏 */
+        .sidebar-header {
+            background-color: #ccffcc;
+            border-bottom: 2px solid #88aa88;
+            padding: 8px 0;
+            text-align: center;
+            font-size: 16px;
+            font-weight: bold;
+            color: #ff3366;
+        }
+        
+        /* 板块内容区 */
+        .sidebar-body {
+            padding: 12px;
+            font-size: 14px;
+            line-height: 1.5;
+            color: #666;
+        }
+        
+        /* 头像样式 */
+        .avatar {
+            display: block;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            border: 2px solid #88aa88;
+            object-fit: cover;
+        }
+        
+        /* 留言板表单样式 */
+        .guestbook-textarea {
+            width: 100%;
+            height: 80px;
+            margin-bottom: 10px;
+            padding: 5px;
+            border: 1px dashed #88aa88;
+            background-color: #fff;
+            font-family: "宋体", SimSun;
+            font-size: 13px;
+            resize: none;
+        }
+        
+        .guestbook-form-row {
+            margin-bottom: 8px;
+        }
+        
+        .guestbook-input {
+            width: 100%;
+            padding: 5px;
+            border: 1px dashed #88aa88;
+            font-family: "宋体", SimSun;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+        
+        /* 留言列表样式 */
+        .guestbook-list {
+            margin-top: 10px;
+        }
+        
+        .guestbook-entry {
+            background-color: #ffffcc;
+            padding: 8px;
+            margin-bottom: 8px;
+            border-left: 3px solid #ffcc66;
+            font-size: 13px;
+        }
+        
+        .guestbook-name {
+            color: #ff6699;
+            font-weight: bold;
+        }
+        
+        /* 图片查看模态框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            padding-top: 50px;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.9);
+        }
+        
+        .modal-content {
+            margin: auto;
+            display: block;
+            width: 80%;
+            max-width: 800px;
+            border: 3px outset #FFFFFF;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
+        }
+        
+        #modalCaption {
+            margin: auto;
+            display: block;
+            width: 80%;
+            max-width: 800px;
+            text-align: center;
+            color: #ccc;
+            padding: 10px 0;
+            font-size: 16px;
+        }
+        
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        
+        .close:hover,
+        .close:focus {
+            color: #ff66b2;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        
+        /* 时光机导航栏样式 */
+        .wayback-nav {
+            background: linear-gradient(135deg, #2c5fa8 0%, #4a7fc1 100%);
+            color: white;
+            padding: 12px 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 15;
+            position: relative;
+        }
+        
+        .wayback-years {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .wayback-years a {
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        
+        .wayback-years a:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        
+        .wayback-years a.active {
+            background-color: rgba(255, 255, 255, 0.3);
+            font-weight: bold;
+        }
+        
+        .wayback-next {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background-color: white;
+            color: #2c5fa8;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .wayback-next:hover {
+            background-color: #e3f2fd;
+            transform: translateX(5px);
+        }
+        
+        .main-content {
+            flex-grow: 1;
+        }
+        
+        .container {
+            background-color: rgba(245, 255, 245, 0.85);
+            border: 3px double #66aa66;
+            padding: 20px;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px dotted #88cc88;
+        }
+        
+        .blog-title {
+            font-size: 32px;
+            color: #ff6699;
+            text-shadow: 2px 2px 0px #ffccdd;
+            margin-bottom: 10px;
+            letter-spacing: 3px;
+        }
+        
+        .subtitle {
+            font-size: 18px;
+            color: #6699ff;
+            font-style: italic;
+        }
+        
+        .date {
+            color: #9966cc;
+            font-size: 16px; /* 放大日期字号 */
+            margin-top: 10px;
+        }
+        
+        .nav {
+            background-color: #ccffcc;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px dashed #88aa88;
+            text-align: center;
+            font-size: 17px; /* 放大导航字号 */
+        }
+        
+        .nav a {
+            color: #ff3366;
+            text-decoration: none;
+            margin: 0 10px;
+            font-weight: bold;
+        }
+        
+        .nav a:hover {
+            color: #ff0066;
+            text-decoration: underline;
+        }
+        
+        .content {
+            line-height: 1.8; /* 增加行高，提升可读性 */
+        }
+        
+        .post {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px dotted #aaddaa;
+            position: relative;
+        }
+        
+        .post-title {
+            font-size: 24px; /* 放大日记标题字号 */
+            color: #ff9933;
+            margin-bottom: 10px;
+            background-color: #ffffcc;
+            padding: 5px 10px;
+            border-left: 5px solid #ffcc66;
+        }
+        
+        .post-content {
+            font-size: 18px; /* 放大日记正文字号 */
+            color: #333;
+            margin-bottom: 15px;
+            line-height: 1.8; /* 增加行高，提升可读性 */
+        }
+        
+        .image-container {
+            text-align: center;
+            margin: 15px 0;
+            position: relative;
+        }
+        
+        /* 10月13日专用图片外框（更短）- 统一宽度 */
+        .broken-image-short {
+            border: 2px dashed #ff6666;
+            background-color: #ccccff;
+            padding: 10px;
+            display: inline-block;
+            margin: 10px;
+            width: 300px;  /* 统一宽度 */
+            height: auto; /* 高度自适应图片 */
+            position: relative;
+        }
+        
+        .broken-image-placeholder {
+            width: 280px;
+            height: 210px;
+            background-color: #cccccc;
+            border: 1px solid #999999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ff0000;
+            font-size: 14px;
+            text-align: center;
+            padding: 10px;
+        }
+        
+        .image-caption {
+            font-size: 14px; /* 放大图片说明文字 */
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 15px;
+            border-top: 2px dotted #88aa88;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .counter {
+            background-color: #000;
+            color: #0f0;
+            padding: 5px 10px;
+            font-family: "Courier New", monospace;
+            display: inline-block;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+        
+        /* 特殊文字样式 */
+        .pink-text { color: #ff66aa; }
+        .blue-text { color: #3366ff; }
+        .purple-text { color: #9966cc; }
+        .orange-text { color: #ff9933; }
+        .green-text { color: #339966; }
+        
+        /* 特殊符号 */
+        .symbol {
+            font-size: 18px;
+            margin: 0 2px;
+        }
+        
+        /* 光标动画 */
+        .blink {
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+        
+        /* 古早风格的滚动条 */
+        ::-webkit-scrollbar {
+            width: 16px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #ccffcc;
+            border: 1px solid #88aa88;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #88aa88;
+            border: 1px solid #669966;
+        }
+        
+        /* 贴纸样式 - 修改为绝对定位 */
+        .sticker {
+            position: absolute;
+            z-index: 5;
+            pointer-events: none;
+        }
+        
+        /* 段落分割线样式 */
+        .divider {
+            text-align: center;
+            margin: 15px 0;
+        }
+        
+        /* 响应式适配 */
+        @media (max-width: 768px) {
+            .content-wrapper {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+            .info-section {
+                flex: 1;
+                min-width: 200px;
+            }
+            
+            /* 移动端适当调整字号 */
+            .post-content {
+                font-size: 18px;
+            }
+            .post-title {
+                font-size: 22px;
+            }
+            
+            /* 移动端图片外框适配 */
+            .broken-image-tall,
+            .broken-image,
+            .broken-image-short {
+                width: 280px;
+                height: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部导航栏 -->
+    <div class="top-nav-container">
+        <!-- 图片查看模态框 -->
+        <div id="imageModal" class="modal">
+            <span class="close">&times;</span>
+            <img class="modal-content" id="modalImage">
+            <div id="modalCaption"></div>
+        </div>
+        
+        <!-- 时光机导航栏 -->
+        <div class="wayback-nav">
+            <div class="wayback-years">
+                <a href="#">2020</a>
+                <a href="#">2021</a>
+                <a href="#">2022</a>
+                <a href="#">2023</a>
+                <a href="#">2024</a>
+                <a href="#" class="active">2025</a> <!-- 选中2025年 -->
+            </div>
+            <a href="#" class="wayback-next">下一个存档 →</a> <!-- 链接可自行替换为实际地址 -->
+        </div>
+    </div>
+    
+    <!-- 下方内容区 -->
+    <div class="content-wrapper">
+        <!-- 左侧栏（导航栏下方） -->
+        <div class="sidebar">
+            <!-- 关于我板块 -->
+            <div class="info-section">
+                <div class="sidebar-header">关于我</div>
+                <div class="sidebar-body">
+                    <img src="头像.jpg" alt="个人头像" class="avatar">
+                    <p>用户名：A_404</p>
+                    <p>介绍：食花的怪客</p>
+                </div>
+            </div>
+            
+            <!-- 留言板板块 -->
+            <div class="info-section">
+                <div class="sidebar-header">留言板</div>
+                <div class="sidebar-body">
+                    <textarea class="guestbook-textarea" placeholder="在这里给我留言吧..."></textarea>
+                    <div class="guestbook-form-row">
+                        <input type="text" id="guestbook-name" class="guestbook-input" placeholder="你的名字">
+                    </div>
+                    <button class="guestbook-btn">提交留言</button>
+                    <div class="guestbook-list">
+                        <div class="guestbook-entry">
+                            <span class="guestbook-name">小晴天：</span>
+                            博主的照片拍得好棒！
+                        </div>
+                        <div class="guestbook-entry">
+                            <span class="guestbook-name">路人甲：</span>
+                            文字很有感触，加油！
+                        </div>
+                        <div class="guestbook-entry">
+                            <span class="guestbook-name">时光旅人：</span>
+                            2025年的你，一切都好吗？
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 主内容区 -->
+        <div class="main-content">
+            <div class="container">
+                <div class="header">
+                    <h1 class="blog-title">2025年的回忆</h1>
+                    <p class="date">最后更新于 2025年11月5日</p>
+                </div>
+                
+                <div class="nav">
+                    <a href="#">首页</a> ✿ 
+                    <a href="#">日记</a> ✿ 
+                    <a href="#">相册</a> ✿ 
+                    <a href="#">留言板</a> ✿ 
+                    <a href="#">关于我</a>
+                </div>
+                
+                <div class="content">
+                    <!-- 9月6日 - 删除左侧贴图 -->
+                    <div class="post">
+                        <h2 class="post-title">11月5日</h2>
+                        <div class="post-content">
+                            <p>好天气，宜出走。</p>
+                            <div class="image-container">                                
+                                <!-- 缩短高度的图片外框 -->
+                                <div class="broken-image-tall" style="background-color: #ffcccc;">
+                                    <img class="local-image-tall" src="9.6爬山图.jpg" alt="爬山图" onerror="this.src='https://via.placeholder.com/300x200?text=爬山图'">
+                                </div>
+                                <div class="image-caption">爬山图<span class="symbol">♬</span></div>
+                                
+                                <!-- 调整贴纸位置以适应缩短的外框 -->
+                                <a href="https://www.glitter-graphics.com" class="sticker" style="right: -80px; top: 60px;">
+                                    <img src="9.6贴图1.png" width=106 height=111 border=0>
+                                </a>
+                                <a href="https://www.glitter-graphics.com" class="sticker" style="right: -100px; top: 180px;">
+                                    <img src="9.6贴图2.png" width=150 height=120 border=0>
+                                </a>
+                            <div class="divider">
+                                <a href="https://www.glitter-graphics.com"><img src="分割线.png" width=300 height=35 border=0></a><br><a href="https://www.glitter-graphics.com" target=_blank></a>
+                            </div>								
+                            </div>
+                        </div>
+                    </div> <!-- 闭合9月6日的post -->
+
+                    <!-- 10月13日 - 更短的外框和图片 -->
+                    <div class="post">
+                        <h2 class="post-title">10月22日</h2>
+                        <div class="post-content">
+                            <p>现在，我思忖自己想要的究竟是这种幸福，还是说我想要的是追逐幸福的过程。</p>
+                            <div class="image-container">
+                                <!-- 原右侧贴图移到左侧并水平翻转，稍微下移 -->
+                                <a href="https://www.glitter-graphics.com" class="sticker" style="left: -130px; top: 40px;">
+                                    <img src="10.13贴图.png" width=187 height=198 border=0>
+                                </a>
+                                
+                                
+                                <!-- 更短的图片外框，宽度不变，高度自适应 -->
+                                <div class="broken-image-short">
+                                    <img class="local-image" src="10.13.jpg" alt="10月22日照片" onerror="this.src='https://via.placeholder.com/300x225?text=10月13日照片'">
+                                </div>
+                            </div>
+                            <div class="divider">
+                                <a href="https://www.glitter-graphics.com"><img src="分割线.png" width=300 height=35 border=0></a><br><a href="https://www.glitter-graphics.com" target=_blank></a>
+                            </div>	
+                        </div>
+                    </div> <!-- 闭合10月13日的post -->
+
+                    <!-- 10月22日 - 左侧贴图移到右侧 -->
+                    <div class="post">
+                        <h2 class="post-title">10月13日</h2>
+                        <div class="post-content">
+                            <p>苦即乐受。</p>
+                            <div class="image-container">
+                                <!-- 第三个图片位置 -->
+                                <div class="broken-image" style="background-color: #ffffcc;">
+                                    <img class="local-image" src="10.22.jpg" alt="10月13日照片" onerror="this.src='https://via.placeholder.com/300x225?text=10月22日照片'">
+                                </div>
+                                
+                                <!-- 原左侧贴图移到右侧 -->
+                                
+                                <a href="https://www.glitter-graphics.com" class="sticker" style="right: -120px; top: 180px;">
+                                    <img src="10.22贴图.png" width=200 height=200 border=0>
+                                </a>
+                            </div> <!-- 闭合image-container -->
+                            <div class="divider">
+                                <a href="https://www.glitter-graphics.com"><img src="分割线.png" width=300 height=35 border=0></a><br><a href="https://www.glitter-graphics.com" target=_blank></a>
+                            </div>	
+                        </div>
+                    </div> <!-- 闭合10月22日的post -->
+
+                    <!-- 11月5日 -->
+                    <div class="post">
+                        <h2 class="post-title">9月6日</h2>
+                        <div class="post-content">
+                            <p>我对未来的追求，主要不是幸福本身，而是为赢得幸福所付出的无限努力，可以说在这种追求中，幸福与美德已经合二为一了。</p>
+                            <div class="image-container">
+                                <!-- 图片左侧的贴纸 -->
+                      
+                        <a href="https://www.glitter-graphics.com" class="sticker" style="left: -90px; top: 0px;">
+                            <img src="11.5左贴图.png" width=120 height=400 border=0>
+                        </a>
+								<!-- 第三个图片位置 -->
+                                <div class="broken-image" style="background-color: #cceeff;">
+                                    <img class="local-image" src="11.5.png" alt="9月6日照片" onerror="this.src='https://via.placeholder.com/300x225?text=11月5日照片'">
+                                </div>
+                                <!-- 图片右侧的贴纸 -->
+                                
+                                <a href="https://www.glitter-graphics.com" class="sticker" style="right: -150px; top: 200px;">
+                                    <img src="11.5贴图.png" width=200 height=290 border=0>
+                                </a>
+                            </div> <!-- 闭合image-container -->
+                           <div class="divider">
+                                <a href="https://www.glitter-graphics.com"><img src="分割线.png" width=300 height=35 border=0></a><br><a href="https://www.glitter-graphics.com" target=_blank></a>
+                            </div>	
+                        </div>
+                    </div> <!-- 闭合11月5日的post -->
+                </div> <!-- 闭合content -->
+                
+                <div class="footer">
+                    <div class="counter">
+                        您是第 <span id="visitor-count">008642</span> 位访客 <span class="blink">█</span>
+                    </div>
+                    <p>Copyright © 2025 All Rights Reserved.</p>
+                    <p>本页面最佳浏览效果：使用Chrome浏览器，分辨率 1000×768</p>
+                </div>
+            </div> <!-- 闭合container -->
+        </div> <!-- 闭合main-content -->
+    </div> <!-- 闭合content-wrapper -->
+    
+    <script>
+        // 图片点击查看大图功能
+        function initImageModal() {
+            // 获取模态框元素
+            var modal = document.getElementById("imageModal");
+            var modalImg = document.getElementById("modalImage");
+            var captionText = document.getElementById("modalCaption");
+            
+            // 为所有图片添加点击事件（包括长高图）
+            var images = document.querySelectorAll('.local-image, .local-image-tall');
+            images.forEach(function(img) {
+                img.onclick = function(){
+                    modal.style.display = "block";
+                    modalImg.src = this.src;
+                    captionText.innerHTML = this.alt || this.parentElement.nextElementSibling?.textContent || "图片预览";
+                }
+            });
+            
+            // 获取关闭按钮
+            var span = document.getElementsByClassName("close")[0];
+            
+            // 点击关闭按钮关闭模态框
+            span.onclick = function() { 
+                modal.style.display = "none";
+            }
+            
+            // 点击模态框背景关闭
+            modal.onclick = function(event) {
+                if (event.target == modal) {
+                    modal.style.display = "none";
+                }
+            }
+        }
+
+        // 在页面加载完成后初始化图片模态框
+        document.addEventListener('DOMContentLoaded', function() {
+            initImageModal();
+        });
+        
+        // 简单的访客计数器动画
+        let count = 8642;
+        setInterval(function() {
+            count++;
+            document.getElementById('visitor-count').textContent = 
+                count.toString().padStart(6, '0');
+        }, 30000); // 每30秒增加一位访客
+        
+        // 年份导航交互
+        document.querySelectorAll('.wayback-years a').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // 移除所有active类
+                document.querySelectorAll('.wayback-years a').forEach(item => {
+                    item.classList.remove('active');
+                });
+                
+                // 为当前点击的链接添加active类
+                this.classList.add('active');
+            });
+        });
+
+        // 留言板提交功能
+        document.querySelector('.guestbook-btn').addEventListener('click', function() {
+            const textarea = document.querySelector('.guestbook-textarea');
+            const nameInput = document.getElementById('guestbook-name');
+            const guestbookList = document.querySelector('.guestbook-list');
+            
+            if (textarea.value.trim() && nameInput.value.trim()) {
+                const newEntry = document.createElement('div');
+                newEntry.className = 'guestbook-entry';
+                newEntry.innerHTML = `<span class="guestbook-name">${nameInput.value}：</span>${textarea.value}`;
+                guestbookList.appendChild(newEntry);
+                
+                // 清空输入框
+                textarea.value = '';
+                nameInput.value = '';
+            }
+        });
+    </script>
+</body>
+</html>
